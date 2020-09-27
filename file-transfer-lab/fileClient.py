@@ -3,6 +3,8 @@
 # Echo client program
 import socket, sys, re, os
 
+sys.path.append("../framed-echo/")
+
 # Environment Variable
 server_address = "127.0.0.1:50001"
 
@@ -13,16 +15,17 @@ def make_file_map():
     return dict(enumerate(list(os.listdir(files))))
 
 
-def send_file(filename=str):
+def send_file(filename:str):
+    # connect to socket
     s = _connect_to_server()
+    # send filename for archiving on the file server
     path = files + filename
+    s.send(bytes(filename, "utf-8"))
+    # Get file byte size and write to file
     fileByteSize = os.path.getsize(path)
     with open(path, "rb") as f:
         byte = f.read(fileByteSize)
-
-        s.send(bytes(filename,"utf-8"))
         s.send(bytes(byte.decode(),"utf-8"))
-
     f.close()
     os.write(1,f"Sent File Byte Size: {fileByteSize}\n".encode())
 

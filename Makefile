@@ -3,7 +3,7 @@
 PYTHON       = python3
 
 server:
-	python file-transfer-lab/server/server.py
+	python file-transfer-lab/fileServer.py
 
 client:
 	python file-transfer-lab/main.py

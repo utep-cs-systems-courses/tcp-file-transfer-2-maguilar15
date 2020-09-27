@@ -1,16 +1,16 @@
 # TCP-File Transfer 
 
-### Project Structure 
+### Requirements 
 
-* **client/** 
-    * ```client.py```
-        * python client. 
-* **client_dump/** 
-    * Directory containing all files that the *client.py* can send. 
-* **server/** 
-    * ```server.py``` 
-        * Server handling connections and saving files. 
-* **server/server_dump** 
-    * Directory containing all files sent through *client.py*. Essentially the file server. 
-* **main.py** 
-    * Terminal Prompt, for specifying file to transfer to *server.py*.  
+Your assignment is to write `fileClient.py` and `fileServer.py` which can transfer a file ("put localName remoteName") from a client to the server. Your programs should: 
+
+* be in the file-transfer-lab subdir
+* work with and without the proxy
+* support multiple clients simultaneously using `fork()`
+* gracefully deal with scenarios such as: 
+    * zero length files
+    * ~~user attempts to transmit a file which does not exist~~
+    * ~~file already exists on the server~~
+    * ~~the client or server unexpectedly disconnect~~
+* optional (unless you're taking this course for grad credit): be able to request ("get") files from server
+

@@ -32,7 +32,18 @@ Your assignment is to write `fileClient.py` and `fileServer.py` which can transf
 * gracefully deal with scenarios such as: 
     * zero length files
     * user attempts to transmit a file which does not exist
-    * file already exists on the server
+    * file already exists on the server 
     * the client or server unexpectedly disconnect
 * optional (unless you're taking this course for grad credit): be able to request ("get") files from server
 
+### Run Server 
+
+```bash 
+make server 
+```
+
+### Run Client 
+
+```bash 
+make client 
+```
