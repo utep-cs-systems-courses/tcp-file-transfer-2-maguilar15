@@ -6,15 +6,14 @@ import socket, sys, re
 sys.path.append("../lib")       # for params
 import params
 
-from framedSock import framedSend, framedReceive
+from .framedSock import framedSend, framedReceive
 
 
 switchesVarDefaults = (
     (('-s', '--server'), 'server', "127.0.0.1:50001"),
-    (('-d', '--debug'), "debug", False), # boolean (set if present)
-    (('-?', '--usage'), "usage", False), # boolean (set if present)
-    )
-
+    (('-d', '--debug'), "debug", False),
+    (('-?', '--usage'), "usage", False),
+)
 
 progname = "framedClient"
 paramMap = params.parseParams(switchesVarDefaults)
@@ -23,7 +22,6 @@ server, usage, debug  = paramMap["server"], paramMap["usage"], paramMap["debug"]
 
 if usage:
     params.usage()
-
 
 try:
     serverHost, serverPort = re.split(":", server)

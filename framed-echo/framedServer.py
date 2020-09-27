@@ -9,7 +9,6 @@ switchesVarDefaults = (
     (('-d', '--debug'), "debug", False), # boolean (set if present)
     (('-?', '--usage'), "usage", False), # boolean (set if present)
     )
-
 progname = "echoserver"
 paramMap = params.parseParams(switchesVarDefaults)
 
@@ -29,7 +28,7 @@ sock, addr = lsock.accept()
 print("connection rec'd from", addr)
 
 
-from framedSock import framedSend, framedReceive
+from .framedSock import framedSend, framedReceive
 
 while True:
     payload = framedReceive(sock, debug)
