@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 
 import os, socket
+from lib.framedSock import framedReceive
+from lib.Color import Color as c
 
 # Server Environment Variables
 listenAddr = "127.0.0.1"
@@ -25,7 +27,7 @@ def _write_to_file(fileName:str,data:str):
    """
    filePath = defaultFilePath + fileName
    if os.path.isfile(filePath):
-       os.write(2, "[X] File Already Exists\n".encode())
+       os.write(2, f"{c.F_Red}[X] File Already Exists\n".encode())
        return
    try:
         with open(filePath, "wb") as f:
@@ -48,26 +50,25 @@ def run_server(hostname:str=listenAddr,port:int=int(listenPort)):
     while not error:
         try:
             # wait until incoming connection request
-            os.write(1,"[-] Waiting for incoming requests......\n".encode())
+            os.write(1,f"{c.F_LightCyan}[-] Waiting for incoming requests......\n".encode())
             conn, addr = s.accept()
-            os.write(1,f"[+] Connected by client: {addr}\n".encode())
+            os.write(1,f"{c.OKGREEN}[+] Connected by client: {addr}\n".encode())
             # Retrieve File Name
             fileName = conn.recv(1024).decode()
-            os.write(1,f"[+] File Name Present: {fileName}\n".encode())
+            os.write(1,f"{c.OKGREEN}[+] File Name Received: {fileName}\n".encode())
 
             # Accept Incoming Text (Automate)
             data = conn.recv(100000).decode()
             if data:
                 # Write to remote directory, check if file already exists
                 _write_to_file(fileName=fileName,data=data)
-
             if debug:
-                os.write(1,f"[?] Status 200: Received Data ({data})\n".encode())
-                os.write(1,f"[?] Sending Data: {data}\n".encode())
+                os.write(1,f"{c.B_LightYellow}[?] Status 200: Received Data ({data})\n".encode())
+                os.write(1,f"{c.B_LightYellow}[?] Sending Data: {data}\n".encode())
 
             conn.close()
         except Exception as e:
-            os.write(2,f"[X] Status 500: Server Exception={e}\n".encode())
+            os.write(2,f"{c.F_Red}[X] Status 500: Server Exception={e}\n".encode())
             error = True
 
 

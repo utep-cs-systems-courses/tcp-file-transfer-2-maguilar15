@@ -1,12 +1,9 @@
 #! /usr/bin/env python3
 
 # Echo client program
+from .framedSock import *
 import socket, sys, re
-
-sys.path.append("../lib")       # for params
 import params
-
-from framedSock import framedSend, framedReceive
 
 
 switchesVarDefaults = (

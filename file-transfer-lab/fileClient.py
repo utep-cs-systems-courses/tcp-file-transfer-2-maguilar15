@@ -2,8 +2,8 @@
 
 # Echo client program
 import socket, sys, re, os
-
-sys.path.append("../framed-echo/")
+#sys.path.append("../framed-echo/")
+from lib.framedSock import framedSend, framedReceive
 
 # Environment Variable
 server_address = "127.0.0.1:50001"
@@ -25,7 +25,8 @@ def send_file(filename:str):
     fileByteSize = os.path.getsize(path)
     with open(path, "rb") as f:
         byte = f.read(fileByteSize)
-        s.send(bytes(byte.decode(),"utf-8"))
+        #s.send(bytes(byte.decode(),"utf-8"))
+        framedSend(s,bytes(byte.decode(),"utf-8"),False)
     f.close()
     os.write(1,f"Sent File Byte Size: {fileByteSize}\n".encode())
 

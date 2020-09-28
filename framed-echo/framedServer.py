@@ -28,7 +28,7 @@ sock, addr = lsock.accept()
 print("connection rec'd from", addr)
 
 
-from framedSock import framedSend, framedReceive
+from .framedSock import framedSend, framedReceive
 
 while True:
     payload = framedReceive(sock, debug)

@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 import re
 
 def framedSend(sock, payload, debug=0):
