@@ -3,7 +3,7 @@
 import os, sys
 
 import fileClient
-
+from lib.Color import Color as c
 
 if __name__ == "__main__":
 
@@ -16,18 +16,20 @@ if __name__ == "__main__":
         prompt = os.read(0,128).decode().strip().replace("\n","")
         # Parsing String
         parse = prompt.split()
+        # Input Sanitization
         try:
-            if parse is None:
-                os.write(2,f"Please follow the format: put filename".encode())
-            elif "exit" in parse:
+
+            if "exit" in parse:
                 sys.exit(1)
             elif "put" not in parse:
-                os.write(2, f"Missing put in command \n".encode())
+                os.write(2, f"Missing put in command. Format: `put localFileName remoteFileName`\n".encode())
             elif "put" in parse and len(parse) <= 1:
-                os.write(2,f"Please type a filename available from the client_dump directory: directory={fileDirectory}\n".encode())
+                os.write(2,f"Follow the format: `put localFileName remoteFileName`\nPlease type a filename available from the client_dump directory: directory={fileDirectory}\n".encode())
+            elif "put" in parse and len(parse) <= 2:
+                os.write(2,f"Please specify name to store file remotely on the server\n".encode())
             else:
-                fileClient.send_file(filename=parse[1])
+                fileClient.send_file(filenameHostMachine=parse[1],filenameRemoteMachine=parse[2])
         except ConnectionRefusedError as e:
-            os.write(2,f"Disconnected from server ,but client still online ;)\n".encode())
+            os.write(2, f"Disconnected from server, but client still online ;)\n".encode())
         except Exception as e:
-            os.write(2,f"File does not exist. Please check client_dump directory for available files={fileDirectory}\n".encode())
+            os.write(2,f"File does not exist. Please check client_dump directory for available files={fileDirectory}, exception={e}\n".encode())

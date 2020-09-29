@@ -6,7 +6,8 @@ import socket, sys, re, os
 from lib.framedSock import framedSend, framedReceive
 
 # Environment Variable
-server_address = "127.0.0.1:50001"
+server_address = os.getenv("HOSTNAME") if os.getenv("HOSTNAME") else "127.0.0.1:50001"
+proxyEnable = ":50000" in server_address if True else False
 
 # All files client will send are here
 files = os.path.join(os.getcwd(), "file-transfer-lab/client_dump/")
@@ -14,13 +15,12 @@ files = os.path.join(os.getcwd(), "file-transfer-lab/client_dump/")
 def make_file_map():
     return dict(enumerate(list(os.listdir(files))))
 
-
-def send_file(filename:str):
+def send_file(filenameHostMachine:str,filenameRemoteMachine:str):
     # connect to socket
     s = _connect_to_server()
     # send filename for archiving on the file server
-    path = files + filename
-    s.send(bytes(filename, "utf-8"))
+    path = files + filenameHostMachine
+    s.send(bytes(filenameRemoteMachine, "utf-8"))
     # Get file byte size and write to file
     fileByteSize = os.path.getsize(path)
     with open(path, "rb") as f:
@@ -49,7 +49,7 @@ def _connect_to_server(server:str=server_address):
         serverHost, serverPort = re.split(":", server)
         serverPort = int(serverPort)
     except:
-        print("Can't parse server:port from '%s'" % server)
+        os.write(2,f"Can't parse server:port from environment variable HOSTNAME: {server}".encode())
         sys.exit(1)
 
     addrFamily = socket.AF_INET
@@ -58,13 +58,13 @@ def _connect_to_server(server:str=server_address):
 
     s = socket.socket(addrFamily, socktype)
     if s is None:
-        print('could not open socket')
+        os.write(2,'could not open socket'.encode())
         sys.exit(1)
 
     s.connect(addrPort)
 
     if s is None:
-        print('could not open socket')
+        os.write(2,'could not open socket'.encode())
         sys.exit(1)
 
     return s
