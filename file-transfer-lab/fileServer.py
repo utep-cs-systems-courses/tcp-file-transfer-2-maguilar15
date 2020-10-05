@@ -4,13 +4,16 @@ import os, socket
 from lib.framedSock import framedReceive
 from lib.Color import Color as c
 
+# Environment Variable
+server_address = os.getenv("HOSTNAME") if os.getenv("HOSTNAME") else "127.0.0.1:50001"
+proxyEnable = ":50000" in server_address if True else False
+
 # Server Environment Variables
-listenAddr = "127.0.0.1"
-listenPort = 50001
+listenAddr,listenPort = server_address.split(":",2)
 path = "file-transfer-lab/server_dump/"
 debug = False
 
-# Global ?
+# Global
 defaultFilePath = os.path.join(os.getcwd(),path)
 
 def list_files(server_file_path:str=defaultFilePath):
@@ -47,30 +50,44 @@ def run_server(hostname:str=listenAddr,port:int=int(listenPort)):
     # Error Flag, Server On
     error = False
 
-    while not error:
-        try:
-            # wait until incoming connection request
-            os.write(1,f"{c.F_LightCyan}[-] Waiting for incoming requests......\n".encode())
-            conn, addr = s.accept()
-            os.write(1,f"{c.OKGREEN}[+] Connected by client: {addr}\n".encode())
-            # Retrieve File Name
-            fileName = conn.recv(1024).decode()
-            os.write(1,f"{c.OKGREEN}[+] File Name Received: {fileName}\n".encode())
+    rc = os.fork()
 
-            # Accept Incoming Text (Automate)
-            data = conn.recv(100000).decode()
-            if data:
-                # Write to remote directory, check if file already exists
-                _write_to_file(fileName=fileName,data=data)
-            if debug:
-                os.write(1,f"{c.B_LightYellow}[?] Status 200: Received Data ({data})\n".encode())
-                os.write(1,f"{c.B_LightYellow}[?] Sending Data: {data}\n".encode())
+    if not rc:
+        while not error:
 
-            conn.close()
-        except Exception as e:
-            os.write(2,f"{c.F_Red}[X] Status 500: Server Exception={e}\n".encode())
-            error = True
+            try:
+                # wait until incoming connection request
+                os.write(1,f"{c.F_LightCyan}[-] Waiting for incoming requests......\n".encode())
+                conn, addr = s.accept()
+                os.write(1,f"{c.OKGREEN}[+] Connected by client: {addr}\n".encode())
+                # Retrieve File Name
+                fileName = conn.recv(1024).decode()
+                os.write(1,f"{c.OKGREEN}[+] File Name Received: {fileName}\n".encode())
 
+                # Accept Incoming Text (Automate)
+                data = conn.recv(100000).decode()
+
+                # exit
+                if data == "":
+                    break
+
+                # Process Message
+                if data:
+                    # write to remote directory, check if file already exists
+                    _write_to_file(fileName=fileName, data=data)
+
+                if debug:
+                    os.write(1,f"{c.B_LightYellow}[?] Status 200: Received Data ({data})\n".encode())
+                    os.write(1,f"{c.B_LightYellow}[?] Sending Data: {data}\n".encode())
+
+                conn.close()
+
+            except Exception as e:
+                os.write(2,f"{c.F_Red}[X] Status 500: Server Exception={e}\n".encode())
+                error = True
+    else:
+        childProcess = os.wait()
+        os.write(2,f"{c.F_Red} [X] Child Process Terminated, Code: {childProcess}\n".encode())
 
 if __name__ == "__main__":
     run_server()
