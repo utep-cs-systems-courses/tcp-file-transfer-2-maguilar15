@@ -4,10 +4,26 @@ import os, sys
 
 import fileClient
 
+from lib.params import parseParams
+
+switchesVarDefaults = (
+    (('-s', '--server'), 'server', "127.0.0.1:50000"),
+    (('-?', '--usage'), "usage", False), # boolean (set if present)
+    )
+
+
+paramMap = parseParams(switchesVarDefaults)
+
+server, usage = paramMap["server"], paramMap["usage"]
+
+if usage:
+    params.usage()
+
+
 if __name__ == "__main__":
 
     fileDirectory = fileClient.make_file_map()
-    print(f"File Directory: {fileDirectory}\n")
+    os.write(1,f"File Directory: {fileDirectory}\n".encode())
 
     while 1:
         # Shell Prompt
@@ -29,7 +45,7 @@ if __name__ == "__main__":
             elif "put" in parse and len(parse) <= 2:
                 os.write(2,f"Follow the format: `put localFileName remoteFileName`\nPlease specify name to store file remotely on the server\n".encode())
             else:
-                fileClient.send_file(filenameHostMachine=parse[1],filenameRemoteMachine=parse[2])
+                fileClient.send_file(serverAddress=server,filenameHostMachine=parse[1],filenameRemoteMachine=parse[2])
         except ConnectionRefusedError:
             os.write(2, f"Disconnected from server, but client still online ;)\n".encode())
         except Exception as e:

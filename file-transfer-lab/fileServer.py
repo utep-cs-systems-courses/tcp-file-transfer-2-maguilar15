@@ -4,9 +4,21 @@ import os, socket
 from lib.framedSock import framedReceive
 from lib.Color import Color as c
 
-# Environment Variable
-server_address = os.getenv("HOSTNAME") if os.getenv("HOSTNAME") else "127.0.0.1:50001"
-proxyEnable = ":50000" in server_address if True else False
+from lib.params import parseParams
+
+switchesVarDefaults = (
+    (('-s', '--server'), 'server', "127.0.0.1:50000"),
+    (('-?', '--usage'), "usage", False), # boolean (set if present)
+    )
+
+
+paramMap = parseParams(switchesVarDefaults)
+
+server_address, usage = paramMap["server"], paramMap["usage"]
+
+if usage:
+    params.usage()
+
 
 # Server Environment Variables
 listenAddr,listenPort = server_address.split(":",2)
@@ -50,46 +62,45 @@ def run_server(hostname:str=listenAddr,port:int=int(listenPort)):
     # Error Flag, Server On
     error = False
 
-    rc = os.fork()
+    while not error:
 
-    if not rc:
-        while not error:
+        try:
+            # wait until incoming connection request
+            os.write(1,f"{c.F_LightCyan}[-] Waiting for incoming requests......\n".encode())
+            conn, addr = s.accept()
+            os.write(1,f"{c.OKGREEN}[+] Connected by client: {addr}\n".encode())
+            # Retrieve File Name
+            fileName = conn.recv(1024).decode()
+            os.write(1,f"{c.OKGREEN}[+] File Name Received: {fileName}\n".encode())
 
-            try:
-                # wait until incoming connection request
-                os.write(1,f"{c.F_LightCyan}[-] Waiting for incoming requests......\n".encode())
-                conn, addr = s.accept()
-                os.write(1,f"{c.OKGREEN}[+] Connected by client: {addr}\n".encode())
-                # Retrieve File Name
-                fileName = conn.recv(1024).decode()
-                os.write(1,f"{c.OKGREEN}[+] File Name Received: {fileName}\n".encode())
+            # Accept Incoming Text (Automate)
+            data = conn.recv(100000).decode()
 
-                # Accept Incoming Text (Automate)
-                data = conn.recv(100000).decode()
+            # exit
+            if data == "":
+                break
 
-                # exit
-                if data == "":
-                    break
+            # Process Message
+            if data:
+                # write to remote directory, check if file already exists
+                _write_to_file(fileName=fileName, data=data)
 
-                # Process Message
-                if data:
-                    # write to remote directory, check if file already exists
-                    _write_to_file(fileName=fileName, data=data)
+            if debug:
+                os.write(1,f"{c.B_LightYellow}[?] Status 200: Received Data ({data})\n".encode())
+                os.write(1,f"{c.B_LightYellow}[?] Sending Data: {data}\n".encode())
 
-                if debug:
-                    os.write(1,f"{c.B_LightYellow}[?] Status 200: Received Data ({data})\n".encode())
-                    os.write(1,f"{c.B_LightYellow}[?] Sending Data: {data}\n".encode())
+            conn.close()
 
-                conn.close()
+        except Exception as e:
+            os.write(2,f"{c.F_Red}[X] Status 500: Server Exception={e}\n".encode())
+            error = True
 
-            except Exception as e:
-                os.write(2,f"{c.F_Red}[X] Status 500: Server Exception={e}\n".encode())
-                error = True
-    else:
-        childProcess = os.wait()
-        os.write(2,f"{c.F_Red} [X] Child Process Terminated, Code: {childProcess}\n".encode())
 
 if __name__ == "__main__":
-    run_server()
+    rc = os.fork()
+    if not rc:
+        run_server()
+    else:
+        os.write(1,f"{c.OKGREEN}[-] Exit Code: {os.wait()}\n".encode())
 
 

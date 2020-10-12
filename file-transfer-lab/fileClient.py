@@ -5,9 +5,6 @@ import socket, sys, re, os
 #sys.path.append("../framed-echo/")
 from lib.framedSock import framedSend, framedReceive
 
-# Environment Variable
-server_address = os.getenv("HOSTNAME") if os.getenv("HOSTNAME") else "127.0.0.1:50001"
-proxyEnable = ":50000" in server_address if True else False
 
 # All files client will send are here
 files = os.path.join(os.getcwd(), "file-transfer-lab/client_dump/")
@@ -17,9 +14,9 @@ def make_file_map():
     return dict(enumerate(list(os.listdir(files))))
 
 
-def send_file(filenameHostMachine:str,filenameRemoteMachine:str):
+def send_file(serverAddress:str, filenameHostMachine:str,filenameRemoteMachine:str):
     # connect to socket
-    s = _connect_to_server()
+    s = _connect_to_server(serverAddress)
     # send filename for archiving on the file server
     path = files + filenameHostMachine
     #s.send(bytes(filenameRemoteMachine, "utf-8"))
@@ -35,7 +32,7 @@ def send_file(filenameHostMachine:str,filenameRemoteMachine:str):
     os.write(1,f"Sent File Byte Size: {fileByteSize}\n".encode())
 
 
-def _connect_to_server(server:str=server_address):
+def _connect_to_server(server:str):
     """
     Returns valid socket.
     :param server:
