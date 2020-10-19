@@ -23,57 +23,50 @@ from threading import Thread, Lock
 from framedSocket import EncapFramedSock
 from fileServer import write_to_file
 
-
 class Server(Thread):
-    def __init__(self,serverAddress):
+    def __init__(self,socketFamily):
         Thread.__init__(self)
-        self.server = serverAddress.split(":")
         self.lock = Lock()
-        self.fsock = None
-        self.socketFamily = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.fsock = EncapFramedSock(socketFamily)
 
     def run(self):
-        self.socketFamily.bind((self.server[0], int(self.server[1])))
-        self.socketFamily.listen(1)
-        self.fsock = EncapFramedSock(self.socketFamily)
         # Error Flag, Server On
-        error = False
         debug = False
-        while not error:
-            try:
-                # wait until incoming connection request
-                os.write(1, f"{c.F_LightCyan}[-] Waiting for incoming requests......\n".encode())
+        self.lock.acquire()
+        try:
+            # wait until incoming connection request
+            os.write(1, f"{c.F_LightCyan}[-] Waiting for incoming requests......\n".encode())
 
-                os.write(1, f"{c.OKGREEN}[+] Connected by client: {self.fsock.addr}\n".encode())
+            os.write(1, f"{c.OKGREEN}[+] Connected by client: {self.fsock.addr}\n".encode())
 
-                # Retrieve File Name
-                fileName = self.fsock.sock.recv(1024).decode()
-                os.write(1, f"{c.OKGREEN}[+] File Name Received: {fileName}\n".encode())
+            # Retrieve File Name
+            fileName = self.fsock.sock.recv(1024).decode()
+            os.write(1, f"{c.OKGREEN}[+] File Name Received: {fileName}\n".encode())
 
-                # Accept Incoming Text (Automate)
-                data = self.fsock.sock.recv(100000).decode()
-                self.fsock.sock.close()
+            # Accept Incoming Text (Automate)
+            data = self.fsock.sock.recv(100000).decode()
 
-                # exit
-                if data == "":
-                    break
+            # Process Message
+            if data:
+                # write to remote directory, check if file already exists
+                write_to_file(fileName=fileName, data=data)
 
-                # Process Message
-                if data:
-                    # write to remote directory, check if file already exists
-                    self.lock.acquire()
-                    write_to_file(fileName=fileName, data=data)
-                    self.lock.release()
+            if debug:
+                os.write(1, f"{c.B_LightYellow}[?] Status 200: Received Data ({data})\n".encode())
+                os.write(1, f"{c.B_LightYellow}[?] Sending Data: {data}\n".encode())
+            self.fsock.sock.close()
+            self.lock.release()
+        except Exception as e:
+            os.write(2, f"{c.F_Red}[X] Status 500: Server Exception={e}\n".encode())
 
-                if debug:
-                    os.write(1, f"{c.B_LightYellow}[?] Status 200: Received Data ({data})\n".encode())
-                    os.write(1, f"{c.B_LightYellow}[?] Sending Data: {data}\n".encode())
 
-            except Exception as e:
-                os.write(2, f"{c.F_Red}[X] Status 500: Server Exception={e}\n".encode())
-                error = True
 
 
 if __name__ == "__main__":
-    server = Server(server_address)
-    server.start()
+    server = server_address.split(":")
+    socketFamily = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    socketFamily.bind((server[0], int(server[1])))
+    socketFamily.listen(1)
+    while True:
+        server = Server(socketFamily)
+        server.start()

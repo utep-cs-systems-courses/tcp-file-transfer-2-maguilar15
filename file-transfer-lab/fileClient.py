@@ -26,8 +26,8 @@ def send_file(serverAddress:str, filenameHostMachine:str,filenameRemoteMachine:s
     with open(path, "rb") as f:
         byte = f.read(fileByteSize)
         #s.send(bytes(byte.decode(),"utf-8"))
-        framedSend(sock,byte.decode())                           # TODO: reason
-    #framedReceive(s,1)                                       # TODO: reason
+        framedSend(sock,byte.decode())
+    #framedReceive(s,1)
     f.close()
     os.write(1,f"Sent File Byte Size: {fileByteSize}\n".encode())
 
