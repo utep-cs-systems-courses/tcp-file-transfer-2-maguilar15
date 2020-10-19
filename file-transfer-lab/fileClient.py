@@ -16,17 +16,17 @@ def make_file_map():
 
 def send_file(serverAddress:str, filenameHostMachine:str,filenameRemoteMachine:str):
     # connect to socket
-    s = _connect_to_server(serverAddress)
+    sock = _connect_to_server(serverAddress)
     # send filename for archiving on the file server
     path = files + filenameHostMachine
-    #s.send(bytes(filenameRemoteMachine, "utf-8"))
-    framedSend(s,filenameRemoteMachine)
+    # Send Message
+    framedSend(sock,filenameRemoteMachine)
     # Get file byte size and write to file
     fileByteSize = os.path.getsize(path)
     with open(path, "rb") as f:
         byte = f.read(fileByteSize)
         #s.send(bytes(byte.decode(),"utf-8"))
-        framedSend(s,byte.decode())                           # TODO: reason
+        framedSend(sock,byte.decode())                           # TODO: reason
     #framedReceive(s,1)                                       # TODO: reason
     f.close()
     os.write(1,f"Sent File Byte Size: {fileByteSize}\n".encode())
@@ -36,7 +36,7 @@ def _connect_to_server(server:str):
     """
     Returns valid socket.
     :param server:
-    :return: socket.
+    :return: socket connection.
     """
     try:
         serverHost, serverPort = re.split(":", server)

@@ -46,6 +46,7 @@ if __name__ == "__main__":
                 os.write(2,f"Follow the format: `put localFileName remoteFileName`\nPlease specify name to store file remotely on the server\n".encode())
             else:
                 fileClient.send_file(serverAddress=server,filenameHostMachine=parse[1],filenameRemoteMachine=parse[2])
+
         except ConnectionRefusedError:
             os.write(2, f"Disconnected from server, but client still online ;)\n".encode())
         except Exception as e:
