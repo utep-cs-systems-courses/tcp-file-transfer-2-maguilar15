@@ -30,12 +30,12 @@ class Server(Thread):
         self.server = serverAddress.split(":")
         self.lock = Lock()
         self.fsock = None
+        self.socketFamily = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def run(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind((self.server[0], int(self.server[1])))
-        s.listen(1)
-        self.fsock = EncapFramedSock(s)
+        self.socketFamily.bind((self.server[0], int(self.server[1])))
+        self.socketFamily.listen(1)
+        self.fsock = EncapFramedSock(self.socketFamily)
         # Error Flag, Server On
         error = False
         debug = False
@@ -52,7 +52,11 @@ class Server(Thread):
 
                 # Accept Incoming Text (Automate)
                 data = self.fsock.sock.recv(100000).decode()
+                self.fsock.sock.close()
 
+                # exit
+                if data == "":
+                    break
 
                 # Process Message
                 if data:
@@ -65,7 +69,6 @@ class Server(Thread):
                     os.write(1, f"{c.B_LightYellow}[?] Status 200: Received Data ({data})\n".encode())
                     os.write(1, f"{c.B_LightYellow}[?] Sending Data: {data}\n".encode())
 
-                self.fsock.sock.close()
             except Exception as e:
                 os.write(2, f"{c.F_Red}[X] Status 500: Server Exception={e}\n".encode())
                 error = True

@@ -74,10 +74,6 @@ def run_server(hostname:str=listenAddr,port:int=int(listenPort)):
             # Accept Incoming Text (Automate)
             data = conn.recv(100000).decode()
 
-            # exit
-            if data == "":
-                break
-
             # Process Message
             if data:
                 # write to remote directory, check if file already exists
