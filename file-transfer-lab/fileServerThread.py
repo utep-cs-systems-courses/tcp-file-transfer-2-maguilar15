@@ -60,8 +60,6 @@ class Server(Thread):
             os.write(2, f"{c.F_Red}[X] Status 500: Server Exception={e}\n".encode())
 
 
-
-
 if __name__ == "__main__":
     server = server_address.split(":")
     socketFamily = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
