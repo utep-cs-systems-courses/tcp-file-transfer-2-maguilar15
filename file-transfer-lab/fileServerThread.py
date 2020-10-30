@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import os, socket
-from lib.framedSock import framedReceive
 from lib.Color import Color as c
 
 from lib.params import parseParams
@@ -10,7 +9,6 @@ switchesVarDefaults = (
     (('-s', '--server'), 'server', "127.0.0.1:50000"),
     (('-?', '--usage'), "usage", False), # boolean (set if present)
     )
-
 
 paramMap = parseParams(switchesVarDefaults)
 
@@ -32,7 +30,6 @@ class Server(Thread):
     def run(self):
         # Error Flag, Server On
         debug = False
-        self.lock.acquire()
         try:
             # wait until incoming connection request
             os.write(1, f"{c.F_LightCyan}[-] Waiting for incoming requests......\n".encode())
@@ -40,22 +37,26 @@ class Server(Thread):
             os.write(1, f"{c.OKGREEN}[+] Connected by client: {self.fsock.addr}\n".encode())
 
             # Retrieve File Name
-            fileName = self.fsock.sock.recv(1024).decode()
+            self.lock.acquire()
+            fileName = self.fsock.receive(debugPrint=debug)
             os.write(1, f"{c.OKGREEN}[+] File Name Received: {fileName}\n".encode())
 
-            # Accept Incoming Text (Automate)
-            data = self.fsock.sock.recv(100000).decode()
+            # Accept Incoming Text
+            data = self.fsock.receive(debugPrint=debug)
+            self.lock.release()
 
             # Process Message
             if data:
                 # write to remote directory, check if file already exists
+                fileName = fileName.decode("utf-8")
+                data = data.decode("utf-8")
                 write_to_file(fileName=fileName, data=data)
 
             if debug:
                 os.write(1, f"{c.B_LightYellow}[?] Status 200: Received Data ({data})\n".encode())
                 os.write(1, f"{c.B_LightYellow}[?] Sending Data: {data}\n".encode())
-            self.fsock.sock.close()
-            self.lock.release()
+
+            self.fsock.close()
         except Exception as e:
             os.write(2, f"{c.F_Red}[X] Status 500: Server Exception={e}\n".encode())
 

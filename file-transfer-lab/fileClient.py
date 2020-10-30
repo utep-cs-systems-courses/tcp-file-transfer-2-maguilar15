@@ -14,20 +14,18 @@ def make_file_map():
     return dict(enumerate(list(os.listdir(files))))
 
 
-def send_file(serverAddress:str, filenameHostMachine:str,filenameRemoteMachine:str):
+def send_file(serverAddress:str, filenameHostMachine:str, filenameRemoteMachine:str):
     # connect to socket
-    sock = _connect_to_server(serverAddress)
+    s = _connect_to_server(serverAddress)
     # send filename for archiving on the file server
     path = files + filenameHostMachine
     # Send Message
-    framedSend(sock,filenameRemoteMachine)
+    framedSend(s,filenameRemoteMachine)
     # Get file byte size and write to file
     fileByteSize = os.path.getsize(path)
     with open(path, "rb") as f:
         byte = f.read(fileByteSize)
-        #s.send(bytes(byte.decode(),"utf-8"))
-        framedSend(sock,byte.decode())
-    #framedReceive(s,1)
+        framedSend(s,byte.decode(encoding="utf-8"))
     f.close()
     os.write(1,f"Sent File Byte Size: {fileByteSize}\n".encode())
 

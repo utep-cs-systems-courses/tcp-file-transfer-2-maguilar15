@@ -12,8 +12,7 @@ class EncapFramedSock:               # a facade
   # New
   def framedSend(self, payload, debug=0):
     if debug: print("framedSend: sending %d byte message" % len(payload))
-    # msg = str(len(payload)).encode() + b':' + payload
-    msg = bytes(payload, encoding="utf-8")
+    msg = str(len(payload)).encode() + b':' + payload
     while len(msg):
       nsent = self.sock.send(msg)
       msg = msg[nsent:]
@@ -54,7 +53,7 @@ class EncapFramedSock:               # a facade
     return self.sock.close()
   def send(self, payload, debugPrint=0):
     if debugPrint: print("framedSend: sending %d byte message" % len(payload))
-    msg = str(len(payload)).encode() + b':' + payload
+    msg = str(len(payload)).encode() + b':' + bytes(payload,encoding="utf-8")
     while len(msg):
       nsent = self.sock.send(msg)
       msg = msg[nsent:]

@@ -1,13 +1,13 @@
 import re
 
+
 def framedSend(sock, payload, debug=0):
-     if debug: print("framedSend: sending %d byte message" % len(payload))
-     #msg = str(len(payload)).encode() + b':' + payload
-     msg = bytes(payload,encoding="utf-8")
-     while len(msg):
-         nsent = sock.send(msg)
-         msg = msg[nsent:]
-     
+    if debug: print("framedSend: sending %d byte message" % len(payload))
+    msg = str(len(payload)).encode() + b':' + bytes(payload,encoding="utf-8")
+    while len(msg):
+        nsent = sock.send(msg)
+        msg = msg[nsent:]
+
 rbuf = b""                      # static receive buffer
 
 def framedReceive(sock, debug=0):
