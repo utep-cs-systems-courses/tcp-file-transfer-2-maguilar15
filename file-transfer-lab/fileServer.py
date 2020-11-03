@@ -11,14 +11,12 @@ switchesVarDefaults = (
     (('-?', '--usage'), "usage", False), # boolean (set if present)
     )
 
-
 paramMap = parseParams(switchesVarDefaults)
 
 server_address, usage = paramMap["server"], paramMap["usage"]
 
 if usage:
     params.usage()
-
 
 # Server Environment Variables
 path = "file-transfer-lab/server_dump/"

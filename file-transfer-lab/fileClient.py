@@ -7,18 +7,23 @@ from lib.framedSock import framedSend, framedReceive
 
 
 # All files client will send are here
-files = os.path.join(os.getcwd(), "file-transfer-lab/client_dump/")
+client_dump = os.path.join(os.getcwd(), "file-transfer-lab/client_dump/")
+server_dump = os.path.join(os.getcwd(),"file-transfer-lab/server_dump/")
+
+
+def server_dump_path():
+    return server_dump
 
 
 def make_file_map():
-    return dict(enumerate(list(os.listdir(files))))
+    return dict(enumerate(list(os.listdir(client_dump))))
 
 
 def send_file(serverAddress:str, filenameHostMachine:str, filenameRemoteMachine:str):
     # connect to socket
     s = _connect_to_server(serverAddress)
     # send filename for archiving on the file server
-    path = files + filenameHostMachine
+    path = client_dump + filenameHostMachine
     # Send Message
     framedSend(s,filenameRemoteMachine)
     # Get file byte size and write to file

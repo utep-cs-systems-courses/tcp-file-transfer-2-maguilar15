@@ -23,7 +23,11 @@ if usage:
 if __name__ == "__main__":
 
     fileDirectory = fileClient.make_file_map()
+    serverPath = fileClient.server_dump_path()
     os.write(1,f"File Directory: {fileDirectory}\n".encode())
+
+    if not os.path.isdir(serverPath):
+        os.mkdir(serverPath)
 
     while 1:
         # Shell Prompt
@@ -31,7 +35,7 @@ if __name__ == "__main__":
         prompt = os.read(0,128).decode().strip().replace("\n","")
         # Parsing String
         parse = prompt.split()
-        # Input Sanitization
+        # User Input
         try:
             if "exit" in parse:
                 os.write(2,"Exiting tcp file transfer prompt\n".encode())
